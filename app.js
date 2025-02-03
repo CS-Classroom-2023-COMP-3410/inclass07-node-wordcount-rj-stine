@@ -1,12 +1,14 @@
-// TODO: Import required modules
-// Hint: You will need the 'fs' module for reading the file and the 'chalk' library for coloring the words.
-
+const fs = require('fs');
+const path = require('path');
+const chalk = require('chalk');
 /**
  * Synchronously reads the content of 'declaration.txt'.
  * @returns {string} The content of the file.
  */
 function readFileContent() {
-    // TODO: Use the 'fs' module to synchronously read the content of 'declaration.txt' and return it.
+    // Read the content of 'declaration.txt'
+    const filePath = path.join(__dirname, 'declaration.txt');
+    return fs.readFileSync(filePath, 'utf8');
 }
 
 /**
@@ -15,11 +17,14 @@ function readFileContent() {
  * @returns {Object} An object with words as keys and their occurrences as values.
  */
 function getWordCounts(content) {
-    // TODO: Implement a function to count occurrences of each word in the content.
-    // Hint: Consider splitting the content into words and then tallying the counts.
     const wordCount = {};
-    const words = content.split(/\W+/).filter(Boolean); // Splitting by non-word characters.
+    const words = content.toLowerCase().split(/\W+/).filter(Boolean);
 
+    words.forEach(word => {
+        wordCount[word] = (wordCount[word] || 0) + 1;
+    });
+
+    return wordCount;
 }
 
 /**
@@ -27,13 +32,15 @@ function getWordCounts(content) {
  * @param {string} word The word to be colored.
  * @param {number} count The frequency of the word.
  * @returns {string} The colored word.
- */
+*/
 function colorWord(word, count) {
-    // TODO: Return the word colored based on its frequency using the 'chalk' library.
-    // For example: 
-    // - Words that occur once can be blue
-    // - Words that occur between 2 and 5 times can be green
-    // - Words that occur more than 5 times can be red
+    if (count === 1) {
+        return chalk.blue(word);
+    } else if (count >= 2 && count <= 5) {
+        return chalk.green(word);
+    } else {
+        return chalk.red(word);
+    }
 }
 
 /**
@@ -45,9 +52,10 @@ function printColoredLines(content, wordCount) {
     const lines = content.split('\n').slice(0, 15);
 
     for (const line of lines) {
-        const coloredLine = line.split(/\W+/).map(word => {
-            // TODO: Color the word based on its frequency using the 'colorWord' function.
-        }).join(' ');
+        const coloredLine = line.split(/\W+/)
+            .filter(Boolean)
+            .map(word => colorWord(word, wordCount[word.toLowerCase()]))
+            .join(' ') + " "; 
 
         console.log(coloredLine);
     }
@@ -67,5 +75,9 @@ if (require.main === module) {
     processFile();
 }
 
-// TODO: Export the functions for testing
-// Hint: You can use the 'module.exports' syntax.
+module.exports = {
+    readFileContent,
+    getWordCounts,
+    colorWord,
+    printColoredLines
+};
